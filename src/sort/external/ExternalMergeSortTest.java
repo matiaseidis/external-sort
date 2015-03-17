@@ -10,10 +10,27 @@ import java.util.Comparator;
 public class ExternalMergeSortTest {
 
     public static void main(String[] args) throws Exception {
-        String pathDir = "/home/us/mergesort";
+    	
+    	test(new ExternalMergeSort2(), 10);
+    	test(new ExternalMergeSort2(), 1000);
+    	test(new ExternalMergeSort2(), 10000);
+    	test(new ExternalMergeSort2(), 100000);
+    	test(new ExternalMergeSort2(), 1000000);
+
+    	test(new ExternalMergeSort(), 10);
+    	test(new ExternalMergeSort(), 1000);
+    	test(new ExternalMergeSort(), 10000);
+    	test(new ExternalMergeSort(), 100000);
+    	test(new ExternalMergeSort(), 1000000);
+    	
+    }
+
+    private static void test(ExternalSort externalSort, int n) throws Exception {
+    	System.out.println("start for " + externalSort.getClass().getSimpleName() + " n: " + n);
+        String pathDir = System.getProperty("user.home") + "/mergesort";
         String fileName = "source";
 
-        File source = setup(pathDir, fileName);
+        File source = setup(pathDir, fileName, n);
 
         System.out.println("source created: "+source.length()/1024+" MB");
         long availableMemBytes = source.length()/12;
@@ -27,11 +44,14 @@ public class ExternalMergeSortTest {
             return thisI.compareTo(oI);
         };
 
-        new ExternalMergeSort().sort(source.getAbsolutePath(), pathDir + "/result", availableMemBytes, comp);
-        System.out.println("sort completed");
-    }
+        System.out.println(String.format("for %s n: %s tooked: %s", externalSort.getClass().getSimpleName(), n, externalSort.sort(source.getAbsolutePath(), pathDir, availableMemBytes, comp)));
+        for (File f : new File(pathDir).listFiles())
+        	f.delete();
+        System.out.println("test cleaned up");
+		
+	}
 
-    private static File setup(String pathDir, String fileName)
+	private static File setup(String pathDir, String fileName, int lines)
             throws IOException {
         File sourceDir = new File(pathDir);
         if(sourceDir.exists())
@@ -47,7 +67,6 @@ public class ExternalMergeSortTest {
         source.createNewFile();
 
         BufferedWriter br = new BufferedWriter(new FileWriter(source)) ;
-        int lines = 5000000;
         for(int i = lines; i>0; i--) {
             br.write("line-"+i);
             br.newLine();

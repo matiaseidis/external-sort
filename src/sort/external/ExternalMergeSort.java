@@ -12,13 +12,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class ExternalMergeSort {
+public class ExternalMergeSort implements ExternalSort {
 
-	public <T> void sort(String inPath, String resultPath, long availableMemBytes, Comparator<T> comp) throws IOException {
+	public <T> long sort(String inPath, String resultDir, long availableMemBytes, Comparator<T> comp) throws IOException {
 
+		long ini = System.currentTimeMillis();
+		
+		String resultPath = inPath + "result";
+		System.out.println("rPath: " + resultPath);
+		System.out.println("in: " + inPath + "-" + 0);
 		int totalChunks = splitSortedChunks(inPath, availableMemBytes, comp);
 		
-		System.out.println("first pass done. "+totalChunks+" created");
+		
 
 		try (BufferedWriter resultWriter = new BufferedWriter(new FileWriter(new File(resultPath)))) {
 		
@@ -29,8 +34,11 @@ public class ExternalMergeSort {
 
 				PriorityQueue<ReaderElem<T>> heap = new PriorityQueue<ReaderElem<T>>((a,b)-> comp.compare(a.value, b.value));
 				
-				for (int i = 0; i < readers.length; i++) 
-					heap.add(new ReaderElem<T>(i, (T)readers[i].readLine()));
+				for (int i = 0; i < readers.length; i++) {
+					String line = readers[i].readLine();
+					if(line != null)
+						heap.add(new ReaderElem(i, line));
+				}
 				
 				while (!heap.isEmpty()) {
 				
@@ -46,13 +54,15 @@ public class ExternalMergeSort {
 				System.out.println("done - result file: " + resultPath);
 
 		} 
+		long tooked = System.currentTimeMillis() - ini;
+		return tooked;
 	}
 
-	private <T> int splitSortedChunks(String inPath, long availableMemBytes, Comparator<T> comp) {
+	private <T> int splitSortedChunks(String toWritePath, long availableMemBytes, Comparator<T> comp) {
 
 		int totalChunks = 0;
 
-		try (BufferedReader br = new BufferedReader(new FileReader(new File(inPath)))) {
+		try (BufferedReader br = new BufferedReader(new FileReader(new File(toWritePath)))) {
 
 			List<T> currentChunk = new LinkedList<T>();
 			int currentChunkBytes = 0;
@@ -64,19 +74,19 @@ public class ExternalMergeSort {
 				currentChunkBytes += (line.length() * 4);
 
 				if (currentChunkBytes >= availableMemBytes) {
-					sortAndWrite(currentChunk, inPath, totalChunks++, comp);
+					sortAndWrite(currentChunk, toWritePath, totalChunks++, comp);
 					currentChunkBytes = 0;
 				}
 
 				line = br.readLine();
 			}
-			sortAndWrite(currentChunk, inPath, totalChunks++, comp);
+			sortAndWrite(currentChunk, toWritePath, totalChunks++, comp);
 
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(0);
 		}
-
+		System.out.println("first pass done. "+totalChunks+" created");
 		return totalChunks;
 	}
 
@@ -100,21 +110,4 @@ public class ExternalMergeSort {
 		}
 	}
 
-}
-
-class ReaderElem<T> {
-	
-	public final int idx;
-	public final T value;
-
-	public ReaderElem(int idx, T value) {
-		super();
-		this.idx = idx;
-		this.value = value;
-	}
-	
-	@Override
-	public String toString() {
-		return value.toString();
-	}
 }
