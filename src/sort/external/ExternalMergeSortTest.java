@@ -23,6 +23,13 @@ public class ExternalMergeSortTest {
     	test(new ExternalMergeSort(), 100000);
     	test(new ExternalMergeSort(), 1000000);
     	
+    	
+//    	only 2 record in mem
+//    	[{10,63},{1000,109},{10000,218},{100000,469},{1000000,2493}]
+//    	http://www.wolframalpha.com/input/?i=%5B%7B10%2C63%7D%2C%7B1000%2C109%7D%2C%7B10000%2C218%7D%2C%7B100000%2C469%7D%2C%7B1000000%2C2493%7D%5D
+//    	k records in mem
+//    	[{10,2},{1000,17},{10000,50},{100000,503},{1000000,4519}]
+//    	http://www.wolframalpha.com/input/?i=%5B%7B10%2C2%7D%2C%7B1000%2C17%7D%2C%7B10000%2C50%7D%2C%7B100000%2C503%7D%2C%7B1000000%2C4519%7D%5D
     }
 
     private static void test(ExternalSort externalSort, int n) throws Exception {
